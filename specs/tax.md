@@ -76,3 +76,10 @@ says, with the rule, why a spouse files apart (`Return.notes`).
 1. A reader that understands the question (okay-desk's frames: the rules are the choices) beside the words' search,
    measured against it on held-out questions.
 2. More of the year: losses carried over, IKZE, a child for part of the year, several ryczałt rates.
+
+### 6.1 The measure (2026-11-26)
+
+`data/heldout.tsv`: 192 questions (24 rules × 4 languages × 2) written before any measure, never used to tune the asks
+or a reader. The word search (`HeldoutSuite`, its floor): the right rule first 134 (pl 29, en 29, ru 39, uk 37 of
+48), among the first three 171. It misses what names no rule's words ("światłowód", "1234,49 zł", "I am 24 and
+employed") and parts joint filing from the rule that closes it.
