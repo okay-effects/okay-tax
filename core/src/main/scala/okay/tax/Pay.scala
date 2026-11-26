@@ -51,7 +51,19 @@ object PayTheory:
     "health.linear.limit" -> s("14100", "mp", "w roku 2026 nie może przekroczyć 14 100 zł"),
     "health.base.income" -> s("1", "health",
       "pomniejszony o kwotę opłaconych w tym roku składek na ubezpieczenia emerytalne, " +
-      "rentowe"))
+      "rentowe"),
+    // THE YEAR'S RETURN (specs/tax.md §4): the spouses' and a single parent's halves, the children's relief, rounding
+    "pit.joint" -> s("2", "pit", "w podwójnej wysokości podatku obliczonego od połowy łącznych dochodów małżonków"),
+    "pit.single.parent" -> s("2", "pit", "podatek jest określany w podwójnej wysokości podatku obliczonego od " +
+      "połowy dochodów osoby samotnie wychowującej dzieci"),
+    "child.month" -> s("92.67", "pit", "jednego małoletniego dziecka – kwota 92,67 zł"),
+    "child.third.month" -> s("166.67", "pit", "166,67 zł na trzecie dziecko"),
+    "child.fourth.month" -> s("225", "pit", "225 zł na czwarte i każde kolejne dziecko"),
+    "child.limit.married" -> s("112000", "pit", "nie przekroczyły w roku podatkowym kwoty 112 000 zł"),
+    "child.limit.single" -> s("56000", "pit", "nie przekroczyły w roku podatkowym kwoty 56 000 zł"),
+    "child.refund" -> s("1", "pit", "podatnikowi przysługuje kwota stanowiąca różnicę między kwotą przysługującego " +
+      "podatnikowi odliczenia a kwotą odliczoną w zeznaniu podatkowym"),
+    "round.zloty" -> s("1", "op", "zaokrągla się do pełnych złotych w ten sposób, że"))
 
 /** the engine: a year of an employment contract (UoP) or of a JDG on ryczałt, month by month, in grosze */
 object Pay:
