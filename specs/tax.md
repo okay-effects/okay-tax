@@ -1,0 +1,38 @@
+# okay-tax — take-home pay and taxes in Poland, from the statutes
+
+A calculator, not tax advice (doradztwo podatkowe is a regulated profession in Poland). Every number it uses is a
+value stated in a statute or an official notice, kept with the statute's own words.
+
+## 1. The theory of a year as data
+
+`PayTheory.y2026`: each value (`Stated(value, source, quote)`) — the PIT scale (12% / 32%, threshold 120 000,
+reducing amount 3600), the employee's costs (250 a month), the linear tax (19%), ryczałt rates, ZUS bases and
+contributions (full, preferential, ulga na start), the health contribution (9%, 4.9% linear with its deduction
+limit, the three ryczałt tiers, the minimum), the annual cap on pension and disability contributions.
+
+The texts are in `sources/2026/` (from the Sejm ELI API, the ZUS notice, M.P. 2025 poz. 1274). `QuotesSuite` checks
+that every quote is in its source, word for word: a value with no quote in a statute is not used.
+
+## 2. The calculations
+
+- `Pay.employment(t, gross)`: an employment contract (UoP), month by month: the cap on contributions, the threshold
+  crossed in the year, the reducing amount 300 a month.
+- `Jdg.year(t, revenue, costs, form, zus, sickness)`: a sole trader (JDG) on the scale, the linear tax or ryczałt,
+  with full, preferential or no social contributions (ulga na start), voluntary sickness insurance or not.
+- `Jdg.compare`: the forms side by side.
+
+The laws (`PaySuite`): the ZUS tables, the health tiers, the minimum wage's net (3605.85), each form's worked
+examples, and the pay laws over drawn inputs (more gross never less take-home; parts add up to the gross).
+
+## 3. The page
+
+okay-ui screens in the browser (Scala.js), in Polish (the default), English, Russian and Ukrainian. The form takes a
+UoP gross and/or a B2B revenue (or a day rate and days), a ryczałt rate, costs, sickness insurance. The result is
+every option sorted by the year's take-home, the first month of the best four part by part, and where every number
+comes from (the statute's words).
+
+## 4. Next
+
+1. The annual returns: PIT-37, PIT-36, PIT-36L, PIT-28 from a year's figures.
+2. Questions about the rules answered with the statute's words (okay-desk reads the question; the engine answers).
+3. okay-desk and okay-invest take `okay-tax-core` instead of their own copies.
