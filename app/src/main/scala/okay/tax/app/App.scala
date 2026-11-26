@@ -16,7 +16,7 @@ final case class Asked(gross: Option[BigDecimal], revenue: Option[BigDecimal], d
  * first month, and where every number comes from (the statute's words). A calculator, not tax advice
  */
 object App:
-  private def zl(x: BigDecimal): String =
+  def zl(x: BigDecimal): String =
     val s = x.setScale(2, BigDecimal.RoundingMode.HALF_UP).toString
     val (whole, frac) = s.span(_ != '.')
     val neg = whole.startsWith("-")
@@ -34,12 +34,12 @@ object App:
 
   def main[R[_]](w: Words, last: Option[Asked] = None)(using In[Ui, R]): Unit ! R =
     val f = last.fold(form(w))(a => form(w).filledWith(a))
-    show(Screen[Option[Asked]](w.title)(Part.text(w.lead), f, Part.info(w.notAdvice))(
-      Button.submit(w.compute, f)(Some(_)))).flatMap {
-      case Some(a) if a.gross.isEmpty && a.b2b.isEmpty =>
+    show(Screen[Either[Unit, Asked]](w.title)(Part.text(w.lead), f, Part.info(w.notAdvice))(
+      Button.submit(w.compute, f)(Right(_)), Button(AnnualWords.of(w.lang).open)(Left(())))).flatMap {
+      case Left(()) => AnnualApp.main[R](w, None, main[R](w, last))
+      case Right(a) if a.gross.isEmpty && a.b2b.isEmpty =>
         show(Screen[Unit](w.title)(Part.problem(w.nothing))(Button(w.back)(()))).flatMap(_ => main[R](w, Some(a)))
-      case Some(a) => result[R](w, a)
-      case None => main[R](w, last)
+      case Right(a) => result[R](w, a)
     }
 
   /** one way of earning: its name and its year */
@@ -66,5 +66,11 @@ object App:
       Part.details(k -> s"${s.value} — «${s.quote}» (${w.source(s.source)})")))*)
     val shown = (Part.text(a.b2b.fold("")(r => s"${w.b2bMonthly}: ${zl(r)}")) +: Part.info(w.notAdvice) +: table +:
       ways.take(4).map(parts)) :+ sources
-    show(Screen[Boolean](w.result)(shown*)(Button(w.change)(true), Button(w.again)(false))).flatMap { change =>
-      main[R](w, Option.when(change)(a)) }
+    // the year's return at this pay: the PIT-11 the engine's withholding makes, filled in
+    val annual = a.gross.toList.map(g =>
+      Button[Either[Boolean, Filed]](AnnualWords.of(w.lang).fromCalculator)(Right(Filed.of(g))))
+    show(Screen[Either[Boolean, Filed]](w.result)(shown*)(
+      (Button[Either[Boolean, Filed]](w.change)(Left(true)) :: Button[Either[Boolean, Filed]](w.again)(Left(false)) ::
+        annual)*)).flatMap {
+      case Left(change) => main[R](w, Option.when(change)(a))
+      case Right(filed) => AnnualApp.main[R](w, Some(filed), result[R](w, a)) }

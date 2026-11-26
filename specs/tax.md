@@ -31,8 +31,28 @@ UoP gross and/or a B2B revenue (or a day rate and days), a ryczałt rate, costs,
 every option sorted by the year's take-home, the first month of the best four part by part, and where every number
 comes from (the statute's words).
 
-## 4. Next
+## 4. The year's return
 
-1. The annual returns: PIT-37, PIT-36, PIT-36L, PIT-28 from a year's figures.
-2. Questions about the rules answered with the statute's words (okay-desk reads the question; the engine answers).
-3. okay-desk and okay-invest take `okay-tax-core` instead of their own copies.
+`Annual` (`core/.../Annual.scala`): an employer's year as its PIT-11 says it (`Pit11`), a JDG's as its books do
+(`Books`); the returns of the year (`Annual.year`):
+
+- PIT-37 (employment) or PIT-36 (with a JDG on the scale): the base is the income less each person's social
+  contributions (art. 26 ust. 1 pkt 2); jointly with a spouse (art. 6 ust. 2) or as a single parent with a child
+  (art. 6 ust. 4c) twice the tax of half; the children's relief (art. 27f: 92.67 a month the first two, 166.67 the
+  third, 225 each next; one child within 112 000 married or single parent, 56 000 otherwise), the part the tax
+  cannot take paid back up to the contributions (ust. 8–10).
+- PIT-36L: 19% of the income less the social contributions and the health ones up to 14 100.
+- PIT-28: the rate of the revenue less the social contributions and half the health ones.
+- Bases and taxes rounded to full złoty (Ordynacja podatkowa art. 63 § 1, `sources/2026/op-2026.txt`).
+
+The laws (`AnnualSuite`): the scale's own figures, the relief's amounts and limits, worked returns; the advances
+the engine withholds come to the return within 12 zł (UoP and every JDG form and ZUS); filing jointly never costs
+more than apart; the relief never raises the tax. Not yet: losses carried over, other reliefs (internet, donations,
+IKZE), several ryczałt rates in one year, a child for part of the year.
+
+The page: the return's own screen, and from the calculator's result the return at that pay (its PIT-11 filled in).
+
+## 5. Next
+
+1. Questions about the rules answered with the statute's words (okay-desk reads the question; the engine answers).
+2. okay-desk and okay-invest take `okay-tax-core` instead of their own copies.
