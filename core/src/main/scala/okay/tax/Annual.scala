@@ -41,7 +41,7 @@ final case class Income(jobs: Vector[Pit11] = Vector.empty, business: Option[Boo
  * A RETURN: the form's name and its lines in order — a key the page words, and its value. `due` more than 0 is to
  * pay, less than 0 is paid back
  */
-final case class Return(form: String, lines: Vector[(String, BigDecimal)]):
+final case class Return(form: String, lines: Vector[(String, BigDecimal)], notes: Vector[String] = Vector.empty):
   def apply(key: String): BigDecimal = lines.find(_._1 == key).fold(BigDecimal(0))(_._2)
   def due: BigDecimal = apply("due")
 
@@ -117,8 +117,13 @@ object Annual:
       children: Int = 0, singleParent: Boolean = false): Vector[Return] =
     val onScale = business.collect { case (b, Form.Scale) => b }
     val own = Income(jobs, onScale)
-    val scaled = Option.when(jobs.nonEmpty || onScale.nonEmpty || spouse.nonEmpty)(
-      scale(t, own, spouse, children, singleParent))
+    // NO HALVES BESIDE THE LINEAR TAX OR RYCZAŁT (art. 6 ust. 8): jointly or as a single parent only when neither
+    // applies; the spouse then files apart, and the return says why
+    val excluded = business.exists(_._2 != Form.Scale) && (spouse.nonEmpty || singleParent)
+    val (withSpouse, single) = if excluded then (None, false) else (spouse, singleParent)
+    val scaled = Option.when(jobs.nonEmpty || onScale.nonEmpty || withSpouse.nonEmpty)(
+      scale(t, own, withSpouse, children, single).copy(notes = if excluded then Vector("halves.excluded")
+        else Vector.empty))
     scaled.toVector ++ business.collect {
       case (b, Form.Linear) => linear(t, b)
       case (b, Form.Lump(rate)) => lump(t, b, rate) }

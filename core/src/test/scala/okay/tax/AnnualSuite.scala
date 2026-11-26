@@ -84,3 +84,15 @@ class AnnualSuite extends munit.FunSuite:
       val apart = Annual.scale(t, x)("tax") + Annual.scale(t, y)("tax")
       assert(joint <= apart, s"$a + $b: joint $joint, apart $apart")
       assert(Annual.scale(t, x, children = 2)("tax.due") <= Annual.scale(t, x)("tax.due"))
+
+  test("no halves beside the linear tax or ryczałt (art. 6 ust. 8): the spouse files apart, the return says why"):
+    val b = Books(100000, 0, 0, 0, 0)
+    for f <- Seq(Form.Linear, Form.Lump(BigDecimal("0.12"))) do
+      val rs = Annual.year(t, Vector(job(200000)), Some(b -> f), Some(Income()))
+      assertEquals(rs.head("tax"), BigDecimal(36400))
+      assertEquals(rs.head.notes, Vector("halves.excluded"))
+      val single = Annual.year(t, Vector(job(200000)), Some(b -> f), children = 1, singleParent = true)
+      assertEquals(single.head("tax"), BigDecimal(36400))
+    // on the scale the halves stand
+    assertEquals(Annual.year(t, Vector(job(200000)), Some(Books(0, 0, 0, 0, 0) -> Form.Scale),
+      Some(Income())).head("tax"), BigDecimal(16800))
