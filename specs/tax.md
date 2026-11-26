@@ -96,3 +96,20 @@ the search alone 70%); apart on 68, the search right 27, the model 26, neither 1
 not a reader, and the one that gives it (4B) does not fit a phone's page. The page keeps the search and shows its
 first three (171 of 192 among them). Next if wanted: train the small model on this domain from a teacher's
 questions (never the held-out ones), then measure again.
+
+## 7. More of the year (2026-11-26)
+
+- A past loss of the business (art. 9 ust. 3, `PastLoss`, `Annual.lossAllowed`): from the income of the same
+  business only (the scale or the linear tax; ryczałt has none), a loss up to 5 000 000 not yet touched at once,
+  else at most half of it a year. Losses older than five years are the caller's to leave out.
+- The deductions from the income (`Deductions`, `Annual.deducted`): the internet up to 760, thermal modernisation up
+  to 53 000 (on the linear return too: art. 26h names art. 30c ust. 2), donations up to 6% of the income less the
+  contributions; none below zero. In `Annual.year` the loss and thermal modernisation go with a linear business's
+  return, the internet and donations with the scale's.
+- The children's relief month by month (`childMonths`): a month's amount by the number of children in it; the
+  one-child limit only when there never was more than one child (art. 27f ust. 2b).
+- The rule `loss` among the questions. It took two held-out questions by common words ("five", "deduct", "income"):
+  the floor is now 133 first, 169 among three, kept rather than tuned on those questions.
+
+Not yet: several ryczałt rates in one year (how the deductions split between rates is not settled here), IKZE (its
+limit is announced, not in the statute), losses on ryczałt's past years under the scale.

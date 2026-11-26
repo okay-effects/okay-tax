@@ -331,7 +331,23 @@ object Rules:
         "більше 85 528 zł звільненого доходу на рік.")(
       pit("21 ust. 44", "Suma przychodów zwolnionych od podatku na podstawie ust. 1 pkt 148 i 152–154 nie może " +
         "w roku podatkowym przekroczyć kwoty 85 528 zł")),
-    r("internet", "Ulga internetowa; odliczenie za internet 760 zł",
+    r("loss", "Strata z lat ubiegłych; odliczenie straty z działalności; strata 50% przez pięć lat",
+      "A loss from past years; deducting a business loss; a loss over five years, half a year",
+      "Убыток прошлых лет; вычет убытка фирмы; убыток по 50% в течение пяти лет",
+      "Збиток минулих років; вирахування збитку фірми; збиток по 50% протягом п'яти років")(
+      "Stratę z działalności odliczasz od dochodu z tej samej działalności w kolejnych pięciu latach: najwyżej " +
+        "połowę straty w roku, albo raz do 5 000 000 zł (resztę dalej po połowie). Na ryczałcie strat się nie " +
+        "odlicza.",
+      "A business loss comes off the income of the same business over the next five years: at most half of the loss " +
+        "a year, or once up to 5 000 000 zł (the rest then half a year). Ryczałt has no losses to deduct.",
+      "Убыток фирмы вычитается из дохода той же фирмы в следующие пять лет: не больше половины убытка в год, или " +
+        "один раз до 5 000 000 zł (остаток дальше по половине). На ryczałt убытки не вычитаются.",
+      "Збиток фірми віднімається від доходу тієї ж фірми в наступні п'ять років: не більше половини збитку на рік, " +
+        "або один раз до 5 000 000 zł (решта далі по половині). На ryczałt збитки не віднімаються.")(
+      pit("9 ust. 3", "w najbliższych kolejno po sobie następujących pięciu latach podatkowych"),
+      pit("9 ust. 3", "nie może przekroczyć 50 % wysokości tej straty"),
+      pit("9 ust. 3", "o kwotę nieprzekraczającą 5 000 000 zł")),
+    r("internet","Ulga internetowa; odliczenie za internet 760 zł",
       "The internet relief; deducting internet costs 760 zł",
       "Льгота на интернет; вычет за интернет 760 zł",
       "Пільга на інтернет; вирахування за інтернет 760 zł")(

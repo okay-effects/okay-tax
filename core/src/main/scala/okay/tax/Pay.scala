@@ -63,7 +63,14 @@ object PayTheory:
     "child.limit.single" -> s("56000", "pit", "nie przekroczyły w roku podatkowym kwoty 56 000 zł"),
     "child.refund" -> s("1", "pit", "podatnikowi przysługuje kwota stanowiąca różnicę między kwotą przysługującego " +
       "podatnikowi odliczenia a kwotą odliczoną w zeznaniu podatkowym"),
-    "round.zloty" -> s("1", "op", "zaokrągla się do pełnych złotych w ten sposób, że"))
+    "round.zloty" -> s("1", "op", "zaokrągla się do pełnych złotych w ten sposób, że"),
+    // MORE OF THE YEAR (specs/tax.md §7): a past loss, the deductions from the income
+    "loss.share" -> s("0.5", "pit", "nie może przekroczyć 50 % wysokości tej straty"),
+    "loss.once" -> s("5000000", "pit", "o kwotę nieprzekraczającą 5 000 000 zł"),
+    "loss.years" -> s("5", "pit", "w najbliższych kolejno po sobie następujących pięciu latach podatkowych"),
+    "deduct.internet" -> s("760", "pit", "w wysokości nieprzekraczającej w roku podatkowym kwoty 760 zł"),
+    "deduct.donations" -> s("0.06", "pit", "niewięcej jednak niż kwoty stanowiącej 6 % dochodu"),
+    "deduct.thermo" -> s("53000", "pit", "Kwota odliczenia nie może przekroczyć 53 000 zł"))
 
 /** the engine: a year of an employment contract (UoP) or of a JDG on ryczałt, month by month, in grosze */
 object Pay:

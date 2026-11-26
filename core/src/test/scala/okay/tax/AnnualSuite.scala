@@ -96,3 +96,40 @@ class AnnualSuite extends munit.FunSuite:
     // on the scale the halves stand
     assertEquals(Annual.year(t, Vector(job(200000)), Some(Books(0, 0, 0, 0, 0) -> Form.Scale),
       Some(Income())).head("tax"), BigDecimal(16800))
+
+  test("the relief month by month: a child for half the year 556.02; 12 and 6 months 1 668.06, no one-child limit"):
+    assertEquals(Annual.childRelief(t, Vector(6), married = true, singleParent = false, 0), BigDecimal("556.02"))
+    assertEquals(Annual.childRelief(t, Vector(12, 6), married = false, singleParent = false, 900000),
+      BigDecimal("1668.06"))
+    // three children, the third for 4 months: 8 months of two (8 × 185.34), 4 of three (4 × 352.01)
+    assertEquals(Annual.childRelief(t, Vector(12, 12, 4), married = true, singleParent = false, 0),
+      BigDecimal("2890.76"))
+
+  test("a past loss (art. 9 ust. 3): up to 5 000 000 untouched at once, else half a year; from its source only"):
+    assertEquals(Annual.lossAllowed(t, Vector(PastLoss(40000))), BigDecimal(40000))
+    assertEquals(Annual.lossAllowed(t, Vector(PastLoss(40000, before = 10000))), BigDecimal(20000))
+    assertEquals(Annual.lossAllowed(t, Vector(PastLoss(8000000))), BigDecimal(4000000))
+    // from the business's income, never the job's
+    val r = Annual.scale(t, Income(Vector(job(100000)), Some(Books(30000, 10000, 0, 0, 0)),
+      Deductions(losses = Vector(PastLoss(50000)))))
+    assertEquals(r("loss"), BigDecimal(20000))
+    assertEquals(r("base"), BigDecimal(100000))
+
+  test("the deductions: internet to 760, thermal modernisation to 53 000, donations to 6% of the income"):
+    val r = Annual.scale(t, Income(Vector(Pit11(110000, 0, 10000, 0, 0)),
+      deductions = Deductions(internet = 1000, thermo = 60000, donations = 10000)))
+    assertEquals(r("internet"), BigDecimal(760))
+    assertEquals(r("thermo"), BigDecimal(53000))
+    assertEquals(r("donations"), BigDecimal(6000))
+    assertEquals(r("base"), BigDecimal(40240))
+    // none below zero
+    val small = Annual.scale(t, Income(Vector(job(500)), deductions = Deductions(internet = 760, thermo = 5000)))
+    assertEquals(small("base"), BigDecimal(0))
+
+  test("the year: a linear business's loss and thermal modernisation on PIT-36L, the internet on PIT-37"):
+    val rs = Annual.year(t, Vector(job(50000)), Some(Books(200000, 0, 0, 0, 0) -> Form.Linear),
+      deductions = Deductions(losses = Vector(PastLoss(30000)), internet = 760, thermo = 10000))
+    assertEquals(rs.map(_.form), Vector("PIT-37", "PIT-36L"))
+    assertEquals(rs(0)("internet"), BigDecimal(760)); assertEquals(rs(0)("loss"), BigDecimal(0))
+    assertEquals(rs(1)("loss"), BigDecimal(30000)); assertEquals(rs(1)("thermo"), BigDecimal(10000))
+    assertEquals(rs(1)("base"), BigDecimal(160000))

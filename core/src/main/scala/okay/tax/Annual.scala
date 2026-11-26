@@ -24,8 +24,20 @@ object Books:
     Books(revenue * 12, y.months.map(_.other).sum, y.months.map(_.social).sum, y.months.map(_.health).sum,
       y.months.map(_.tax).sum)
 
+/** a past year's loss of the business: its amount and what of it was deducted before */
+final case class PastLoss(amount: BigDecimal, before: BigDecimal = 0)
+
+/**
+ * WHAT A PERSON DEDUCTS beyond the contributions (specs/tax.md §7): the business's past losses (art. 9 ust. 3, from
+ * its own income), the internet, thermal modernisation and donations (art. 26, art. 26h)
+ */
+final case class Deductions(losses: Vector[PastLoss] = Vector.empty, internet: BigDecimal = 0,
+    thermo: BigDecimal = 0, donations: BigDecimal = 0)
+
 /** what one person earned in a year on the scale: employers' PIT-11s, and a JDG's books if it is on the scale */
-final case class Income(jobs: Vector[Pit11] = Vector.empty, business: Option[Books] = None):
+final case class Income(jobs: Vector[Pit11] = Vector.empty, business: Option[Books] = None,
+    deductions: Deductions = Deductions()):
+  def businessIncome: BigDecimal = business.fold(BigDecimal(0))(b => (b.revenue - b.costs).max(0))
   /** each source's income (a source's loss is not set against another's in the year) */
   def income: BigDecimal = jobs.map(j => (j.revenue - j.costs).max(0)).sum +
     business.fold(BigDecimal(0))(b => (b.revenue - b.costs).max(0))
@@ -65,44 +77,89 @@ object Annual:
    * third, 225 each next; one child only within the income limit (`limitIncome`: art. 27f ust. 2a) */
   def childRelief(t: Theory, children: Int, married: Boolean, singleParent: Boolean,
       limitIncome: BigDecimal): BigDecimal =
+    childRelief(t, Vector.fill(children.max(0))(12), married, singleParent, limitIncome)
+
+  /**
+   * THE RELIEF MONTH BY MONTH (art. 27f ust. 2: "za każdy miesiąc kalendarzowy"): `months` each child's months in the
+   * year; a month's amount by the number of children in it (the months taken together, so which months does not
+   * change the sum). The one-child limit only when there never was more than one child (ust. 2b)
+   */
+  def childRelief(t: Theory, months: Vector[Int], married: Boolean, singleParent: Boolean,
+      limitIncome: BigDecimal): BigDecimal =
     def v(k: String) = t(k).value
+    def nth(i: Int) = if i <= 2 then v("child.month") else if i == 3 then v("child.third.month")
+      else v("child.fourth.month")
     val limit = if married || singleParent then v("child.limit.married") else v("child.limit.single")
-    if children <= 0 || children == 1 && limitIncome > limit then 0
-    else (1 to children).map(i => if i <= 2 then v("child.month") else if i == 3 then v("child.third.month")
-      else v("child.fourth.month")).sum * 12
+    val ms = months.map(_.max(0).min(12)).filter(_ > 0)
+    if ms.isEmpty || ms.size == 1 && limitIncome > limit then 0
+    else (1 to 12).map(m => (1 to ms.count(_ >= m)).map(nth).sum).sum
+
+  /** what of past losses may come off this year (art. 9 ust. 3): a loss up to 5 000 000 not yet touched may come off
+   * at once; else at most half of it a year. Losses older than five years are not given (the caller's to leave out) */
+  def lossAllowed(t: Theory, losses: Vector[PastLoss]): BigDecimal =
+    def v(k: String) = t(k).value
+    losses.map { l =>
+      val rest = (l.amount - l.before).max(0)
+      if l.before == 0 && l.amount <= v("loss.once") then rest else rest.min(l.amount * v("loss.share")) }.sum
+
+  /**
+   * ONE PERSON'S DEDUCTIONS ON THE SCALE, in order, and the base they leave: the business's past loss from its own
+   * income, the social contributions, the internet (up to 760), thermal modernisation (up to 53 000), donations (up
+   * to 6% of the income less the contributions); none below zero
+   */
+  def deducted(t: Theory, i: Income): (Vector[(String, BigDecimal)], BigDecimal) =
+    def v(k: String) = t(k).value
+    val d = i.deductions
+    val loss = lossAllowed(t, d.losses).min(i.businessIncome)
+    val afterSocial = (i.income - loss - i.social).max(0)
+    val internet = d.internet.max(0).min(v("deduct.internet")).min(afterSocial)
+    val thermo = d.thermo.max(0).min(v("deduct.thermo")).min(afterSocial - internet)
+    val donations = d.donations.max(0).min(grosz(afterSocial * v("deduct.donations")))
+      .min(afterSocial - internet - thermo)
+    (Vector("loss" -> loss, "internet" -> internet, "thermo" -> thermo, "donations" -> donations).filter(_._2 > 0),
+      afterSocial - internet - thermo - donations)
 
   /**
    * ON THE SCALE: PIT-37, or PIT-36 when a JDG on the scale is among the incomes. With `spouse` the spouses' joint
    * return (art. 6 ust. 2: twice the tax of half their bases); `singleParent` the same on one's own (art. 6 ust. 4c).
-   * The children's relief from the tax, the part the tax could not take paid back up to the contributions (art. 27f
-   * ust. 8–10)
+   * The children's relief from the tax (`children` the whole year, `childMonths` each one's months of a part), the
+   * part the tax could not take paid back up to the contributions (art. 27f ust. 8–10)
    */
   def scale(t: Theory, own: Income, spouse: Option[Income] = None, children: Int = 0,
-      singleParent: Boolean = false): Return =
+      singleParent: Boolean = false, childMonths: Vector[Int] = Vector.empty): Return =
     val all = own +: spouse.toVector
-    val base = zloty(all.map(_.base).sum)
-    val halved = spouse.nonEmpty || singleParent && children > 0
+    val each = all.map(deducted(t, _))
+    val deductions = each.flatMap(_._1).groupMapReduce(_._1)(_._2)(_ + _)
+    val base = zloty(each.map(_._2).sum)
+    val months = Vector.fill(children.max(0))(12) ++ childMonths.filter(_ > 0)
+    val halved = spouse.nonEmpty || singleParent && months.nonEmpty
     val tax = zloty(if halved then scaleTax(t, base / 2) * 2 else scaleTax(t, base))
-    val relief = childRelief(t, children, spouse.nonEmpty, singleParent, all.map(_.base).sum)
+    val relief = childRelief(t, months, spouse.nonEmpty, singleParent, all.map(_.base).sum)
     val taken = relief.min(tax)
     val back = (relief - taken).min(all.map(i => i.social + i.health).sum)
     val taxDue = zloty(tax - taken)
     val advances = all.map(_.advances).sum
     Return(if all.exists(_.business.nonEmpty) then "PIT-36" else "PIT-37", Vector(
       "revenue" -> all.map(_.revenue).sum, "costs" -> all.map(_.costs).sum, "income" -> all.map(_.income).sum,
-      "social" -> all.map(_.social).sum, "base" -> base, "tax" -> tax, "children" -> taken, "tax.due" -> taxDue,
-      "advances" -> advances, "children.back" -> back, "due" -> (taxDue - advances - back)))
+      "social" -> all.map(_.social).sum) ++ Vector("loss", "internet", "thermo", "donations").flatMap(k =>
+      deductions.get(k).map(k -> _)) ++ Vector("base" -> base, "tax" -> tax, "children" -> taken,
+      "tax.due" -> taxDue, "advances" -> advances, "children.back" -> back, "due" -> (taxDue - advances - back)))
 
-  /** PIT-36L: 19% of the income less the social contributions and the health ones up to the year's limit */
-  def linear(t: Theory, b: Books): Return =
+  /** PIT-36L: 19% of the income less a past loss, the social contributions, the health ones up to the year's limit
+   * and thermal modernisation (art. 26h: from the base of art. 30c ust. 2 too) */
+  def linear(t: Theory, b: Books, d: Deductions = Deductions()): Return =
     def v(k: String) = t(k).value
     val income = (b.revenue - b.costs).max(0)
+    val loss = lossAllowed(t, d.losses).min(income)
     val health = b.health.min(v("health.linear.limit"))
-    val base = zloty((income - b.social - health).max(0))
+    val before = (income - loss - b.social - health).max(0)
+    val thermo = d.thermo.max(0).min(v("deduct.thermo")).min(before)
+    val base = zloty(before - thermo)
     val tax = zloty(base * v("pit.linear"))
-    Return("PIT-36L", Vector("revenue" -> b.revenue, "costs" -> b.costs, "income" -> income, "social" -> b.social,
-      "health.deducted" -> health, "base" -> base, "tax" -> tax, "tax.due" -> tax, "advances" -> b.advances,
-      "due" -> (tax - b.advances)))
+    Return("PIT-36L", Vector("revenue" -> b.revenue, "costs" -> b.costs, "income" -> income) ++
+      Option.when(loss > 0)("loss" -> loss) ++ Vector("social" -> b.social, "health.deducted" -> health) ++
+      Option.when(thermo > 0)("thermo" -> thermo) ++ Vector("base" -> base, "tax" -> tax, "tax.due" -> tax,
+      "advances" -> b.advances, "due" -> (tax - b.advances)))
 
   /** PIT-28: `rate` of the revenue less the social contributions and half the health ones */
   def lump(t: Theory, b: Books, rate: BigDecimal): Return =
@@ -112,18 +169,27 @@ object Annual:
     Return("PIT-28", Vector("revenue" -> b.revenue, "social" -> b.social, "health.deducted" -> health,
       "base" -> base, "tax" -> tax, "tax.due" -> tax, "advances" -> b.advances, "due" -> (tax - b.advances)))
 
-  /** the returns of a year: employment and a JDG on the scale in one; a JDG on the linear tax or ryczałt in its own */
+  /**
+   * The returns of a year: employment and a JDG on the scale in one; a JDG on the linear tax or ryczałt in its own.
+   * `deductions` the person's own: a past loss with the business it came from (on the scale or the linear tax; none
+   * on ryczałt here), thermal modernisation with the linear return when there is one, the internet and donations on
+   * the scale (art. 26)
+   */
   def year(t: Theory, jobs: Vector[Pit11], business: Option[(Books, Form)], spouse: Option[Income] = None,
-      children: Int = 0, singleParent: Boolean = false): Vector[Return] =
+      children: Int = 0, singleParent: Boolean = false, deductions: Deductions = Deductions(),
+      childMonths: Vector[Int] = Vector.empty): Vector[Return] =
     val onScale = business.collect { case (b, Form.Scale) => b }
-    val own = Income(jobs, onScale)
+    val linearly = business.exists(_._2 == Form.Linear)
+    val onScaleDeducts = if linearly then deductions.copy(losses = Vector.empty, thermo = 0)
+      else if onScale.isEmpty then deductions.copy(losses = Vector.empty) else deductions
+    val own = Income(jobs, onScale, onScaleDeducts)
     // NO HALVES BESIDE THE LINEAR TAX OR RYCZAŁT (art. 6 ust. 8): jointly or as a single parent only when neither
     // applies; the spouse then files apart, and the return says why
     val excluded = business.exists(_._2 != Form.Scale) && (spouse.nonEmpty || singleParent)
     val (withSpouse, single) = if excluded then (None, false) else (spouse, singleParent)
     val scaled = Option.when(jobs.nonEmpty || onScale.nonEmpty || withSpouse.nonEmpty)(
-      scale(t, own, withSpouse, children, single).copy(notes = if excluded then Vector("halves.excluded")
-        else Vector.empty))
+      scale(t, own, withSpouse, children, single, childMonths).copy(notes =
+        if excluded then Vector("halves.excluded") else Vector.empty))
     scaled.toVector ++ business.collect {
-      case (b, Form.Linear) => linear(t, b)
+      case (b, Form.Linear) => linear(t, b, Deductions(deductions.losses, thermo = deductions.thermo))
       case (b, Form.Lump(rate)) => lump(t, b, rate) }

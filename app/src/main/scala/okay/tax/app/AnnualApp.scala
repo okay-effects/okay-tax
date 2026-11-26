@@ -2,7 +2,7 @@ package okay.tax.app
 
 import okay.business.model.{Button, Field, Form, Part, Screen, Ui}
 import okay.business.scala3.*
-import okay.tax.{Annual, Books, Income, PayTheory, Pit11, Return, Rules}
+import okay.tax.{Annual, Books, Deductions, Income, PastLoss, PayTheory, Pit11, Return, Rules}
 import okay.tax.Form as TaxForm
 
 /** what the year's return was asked with: the PIT-11s' sums, a business's year, a spouse's PIT-11, the children */
@@ -11,7 +11,11 @@ final case class Filed(revenue: Option[BigDecimal], costs: Option[BigDecimal], s
     bCosts: Option[BigDecimal], bSocial: Option[BigDecimal], bHealth: Option[BigDecimal],
     bAdvances: Option[BigDecimal], sRevenue: Option[BigDecimal], sCosts: Option[BigDecimal],
     sSocial: Option[BigDecimal], sHealth: Option[BigDecimal], sAdvances: Option[BigDecimal], children: Option[Long],
-    singleParent: Boolean):
+    singleParent: Boolean, childMonths: Option[Long], lossAmount: Option[BigDecimal],
+    lossBefore: Option[BigDecimal], internet: Option[BigDecimal], thermo: Option[BigDecimal],
+    donations: Option[BigDecimal]):
+  def deductions: Deductions = Deductions(lossAmount.filter(_ > 0).map(l => PastLoss(l, z(lossBefore))).toVector,
+    z(internet), z(thermo), z(donations))
   private def z(x: Option[BigDecimal]) = x.getOrElse(BigDecimal(0))
   def jobs: Vector[Pit11] = revenue.map(r => Pit11(r, z(costs), z(social), z(health), z(advances))).toVector
   def business: Option[(Books, TaxForm)] = form.map(f => Books(z(bRevenue), z(bCosts), z(bSocial), z(bHealth),
@@ -24,7 +28,7 @@ object Filed:
   def of(gross: BigDecimal): Filed =
     val p = Pit11.of(PayTheory.y2026, gross)
     Filed(Some(p.revenue), Some(p.costs), Some(p.social), Some(p.health), Some(p.advances), None, None, None, None,
-      None, None, None, None, None, None, None, None, false)
+      None, None, None, None, None, None, None, None, false, None, None, None, None, None, None)
 
 /**
  * THE YEAR'S RETURN (specs/tax.md §4): the PIT-11s, a business, a spouse, the children in; each return out line by
@@ -32,6 +36,7 @@ object Filed:
  */
 object AnnualApp:
   private def form(w: Words, a: AnnualWords): Form[Filed] =
+    val m = MoreWords.of(w.lang)
     def money(label: String) = Field.money(label, "PLN").optional
     val lump = Vector("12% (IT)" -> "0.12", "8,5%" -> "0.085", "14%" -> "0.14", "15%" -> "0.15", "17%" -> "0.17")
       .map((l, r) => s"${w.lump} $l" -> Option[TaxForm](TaxForm.Lump(BigDecimal(r))))
@@ -41,7 +46,8 @@ object AnnualApp:
       Field.choice(a.form, forms*), money(a.bRevenue), money(a.bCosts), money(a.bSocial), money(a.bHealth),
       money(a.bAdvances), money(a.spouse + a.revenue), money(a.spouse + a.costs), money(a.spouse + a.social),
       money(a.spouse + a.health), money(a.spouse + a.advances), Field.whole(a.children).optional,
-      Field.flag(a.singleParent))).as[Filed]
+      Field.flag(a.singleParent), Field.whole(m.childMonths).optional, money(m.lossAmount), money(m.lossBefore),
+      money(m.internet), money(m.thermo), money(m.donations))).as[Filed]
 
   /** the form, then the returns; `back` the calculator */
   def main[R[_]](w: Words, last: Option[Filed], back: => Unit ! R)(using In[Ui, R]): Unit ! R =
@@ -63,12 +69,13 @@ object AnnualApp:
     // a note of the return (`halves.excluded`): the rule that made it, said and quoted
     val notes = r.notes.flatMap(n => Rules.all.find(_.id == n)).map(RulesApp.shown(lang, _))
     val lines = Part.details(r.lines.filterNot((k, v) => k.startsWith("children") && v == 0)
-      .map((k, v) => a.line(k) -> App.zl(v))*)
+      .map((k, v) => MoreWords.of(lang).lines.getOrElse(k, a.line(k)) -> App.zl(v))*)
     Part.section(r.form)(((said +: notes) :+ lines)*)
 
   def result[R[_]](w: Words, a: AnnualWords, filed: Filed, back: => Unit ! R)(using In[Ui, R]): Unit ! R =
     val returns = Annual.year(PayTheory.y2026, filed.jobs, filed.business, filed.spouse,
-      filed.children.fold(0)(_.toInt), filed.singleParent)
+      filed.children.fold(0)(_.toInt), filed.singleParent, filed.deductions,
+      filed.childMonths.map(_.toInt.min(12)).filter(_ > 0).toVector)
     val total = returns.map(_.due).sum
     val sum = if returns.size < 2 then Vector.empty
       else Vector(if total > 0 then Part.warning(s"${a.toPay}: ${App.zl(total)}")
