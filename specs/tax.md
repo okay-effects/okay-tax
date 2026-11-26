@@ -83,3 +83,16 @@ says, with the rule, why a spouse files apart (`Return.notes`).
 or a reader. The word search (`HeldoutSuite`, its floor): the right rule first 134 (pl 29, en 29, ru 39, uk 37 of
 48), among the first three 171. It misses what names no rule's words ("światłowód", "1234,49 zł", "I am 24 and
 employed") and parts joint filing from the rule that closes it.
+
+### 6.2 A model choosing the rule (2026-11-26, okay-desk `RuleLines`, `DomainBench data/heldout.tsv`)
+
+The rule as one line `rule: <English title>`, the options weighed by the model (okay-desk's frames), right first of
+192: Qwen3-0.6B 16 (it takes the first rules listed: `scale` 114 times, `free` 63), with what each says 20; the
+0.6B with the self-play adapter sp3 51; 1.7B 46; 4B 89, with what each says 80. Among the word search's first three
+only (in the rules' own order): 4B 133, with what each says 128, sp3 92. No model beats the search (134).
+
+Together (`okay-desk-private/rules/agree.scala`): the search and the 4B among three agree on 124, right 107 (86%,
+the search alone 70%); apart on 68, the search right 27, the model 26, neither 15. A model is a second opinion here,
+not a reader, and the one that gives it (4B) does not fit a phone's page. The page keeps the search and shows its
+first three (171 of 192 among them). Next if wanted: train the small model on this domain from a teacher's
+questions (never the held-out ones), then measure again.
