@@ -52,7 +52,27 @@ IKZE), several ryczałt rates in one year, a child for part of the year.
 
 The page: the return's own screen, and from the calculator's result the return at that pay (its PIT-11 filled in).
 
-## 5. Next
+## 5. The questions about the rules
 
-1. Questions about the rules answered with the statute's words (okay-desk reads the question; the engine answers).
-2. okay-desk and okay-invest take `okay-tax-core` instead of their own copies.
+`Rules` (`core/.../Rules.scala`): 24 rules of the statutes as data — how people ask about each (phrases in Polish,
+English, Russian, Ukrainian; the first its title), what it says in each language, and where it stands (`Cite`: the
+source, the article, the words verbatim). The scale and the reducing amount, the employee's costs, filing jointly
+and as a single parent and when neither is open (art. 6 ust. 8), the children's relief and its paid-back part, the
+linear tax (19%, choosing it, its health contribution), ryczałt (rates, the 2 000 000 euro limit, its health
+contribution), the health contribution on the scale, ZUS 2026, the exemptions of art. 21 ust. 1 pkt 148 and 152–154
+and their shared cap, the internet, donations, thermal modernisation, the deadline, rounding.
+
+`Rules.find(question)`: the question's words to stems (diacritics off, the first five letters, the words of asking
+itself left out), each weighed by how few rules have it, twice in a rule's asks as in what it says.
+
+The laws: every quote in its source (`QuotesSuite`, a line end's hyphen joined), every rule in four languages, each
+way a rule is asked finds it first, questions in people's own words find the right rule (`RulesSuite`).
+
+The page: "Pytania o przepisy" — a question or a rule from the list; each rule said and quoted. The year's return
+says, with the rule, why a spouse files apart (`Return.notes`).
+
+## 6. Next
+
+1. A reader that understands the question (okay-desk's frames: the rules are the choices) beside the words' search,
+   measured against it on held-out questions.
+2. More of the year: losses carried over, IKZE, a child for part of the year, several ryczałt rates.

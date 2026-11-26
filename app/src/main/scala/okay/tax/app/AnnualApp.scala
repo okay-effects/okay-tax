@@ -2,7 +2,7 @@ package okay.tax.app
 
 import okay.business.model.{Button, Field, Form, Part, Screen, Ui}
 import okay.business.scala3.*
-import okay.tax.{Annual, Books, Income, PayTheory, Pit11, Return}
+import okay.tax.{Annual, Books, Income, PayTheory, Pit11, Return, Rules}
 import okay.tax.Form as TaxForm
 
 /** what the year's return was asked with: the PIT-11s' sums, a business's year, a spouse's PIT-11, the children */
@@ -56,12 +56,15 @@ object AnnualApp:
       case Some(filed) => result[R](w, a, filed, back)
     }
 
-  private def returned(a: AnnualWords, r: Return): Part =
+  private def returned(lang: String, a: AnnualWords, r: Return): Part =
     val due = r.due
     val said = if due > 0 then Part.warning(s"${a.toPay}: ${App.zl(due)}")
       else if due < 0 then Part.info(s"${a.back}: ${App.zl(-due)}") else Part.info(a.even)
-    Part.section(r.form)(said, Part.details(r.lines.filterNot((k, v) => k.startsWith("children") && v == 0)
-      .map((k, v) => a.line(k) -> App.zl(v))*))
+    // a note of the return (`halves.excluded`): the rule that made it, said and quoted
+    val notes = r.notes.flatMap(n => Rules.all.find(_.id == n)).map(RulesApp.shown(lang, _))
+    val lines = Part.details(r.lines.filterNot((k, v) => k.startsWith("children") && v == 0)
+      .map((k, v) => a.line(k) -> App.zl(v))*)
+    Part.section(r.form)(((said +: notes) :+ lines)*)
 
   def result[R[_]](w: Words, a: AnnualWords, filed: Filed, back: => Unit ! R)(using In[Ui, R]): Unit ! R =
     val returns = Annual.year(PayTheory.y2026, filed.jobs, filed.business, filed.spouse,
@@ -70,6 +73,6 @@ object AnnualApp:
     val sum = if returns.size < 2 then Vector.empty
       else Vector(if total > 0 then Part.warning(s"${a.toPay}: ${App.zl(total)}")
         else if total < 0 then Part.info(s"${a.back}: ${App.zl(-total)}") else Part.info(a.even))
-    val parts = (sum ++ returns.map(returned(a, _))) :+ Part.text(a.law) :+ Part.info(w.notAdvice)
+    val parts = (sum ++ returns.map(returned(w.lang, a, _))) :+ Part.text(a.law) :+ Part.info(w.notAdvice)
     show(Screen[Boolean](a.result)(parts*)(Button(a.change)(true), Button(a.calculator)(false))).flatMap { change =>
       if change then main[R](w, Some(filed), back) else back }

@@ -2,7 +2,8 @@
 
 Take-home pay in Poland for 2026: an employment contract (UoP) and a sole trader's B2B (the scale, the linear tax,
 ryczałt; full, preferential or no ZUS), side by side, and the year's return (PIT-37, PIT-36, PIT-36L, PIT-28:
-jointly, a single parent, the children's relief). Every number comes from the statutes and is kept with their
+jointly, a single parent, the children's relief), and questions about the rules answered with the statute's
+words. Every number comes from the statutes and is kept with their
 own words.
 
 **Live:** https://okay-effects.github.io/okay-tax/

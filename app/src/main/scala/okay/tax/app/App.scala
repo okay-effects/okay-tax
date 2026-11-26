@@ -34,9 +34,12 @@ object App:
 
   def main[R[_]](w: Words, last: Option[Asked] = None)(using In[Ui, R]): Unit ! R =
     val f = last.fold(form(w))(a => form(w).filledWith(a))
-    show(Screen[Either[Unit, Asked]](w.title)(Part.text(w.lead), f, Part.info(w.notAdvice))(
-      Button.submit(w.compute, f)(Right(_)), Button(AnnualWords.of(w.lang).open)(Left(())))).flatMap {
-      case Left(()) => AnnualApp.main[R](w, None, main[R](w, last))
+    // Left(true): the year's return; Left(false): the questions about the rules
+    show(Screen[Either[Boolean, Asked]](w.title)(Part.text(w.lead), f, Part.info(w.notAdvice))(
+      Button.submit(w.compute, f)(Right(_)), Button(AnnualWords.of(w.lang).open)(Left(true)),
+      Button(RulesWords.of(w.lang).open)(Left(false)))).flatMap {
+      case Left(true) => AnnualApp.main[R](w, None, main[R](w, last))
+      case Left(false) => RulesApp.main[R](w, main[R](w, last))
       case Right(a) if a.gross.isEmpty && a.b2b.isEmpty =>
         show(Screen[Unit](w.title)(Part.problem(w.nothing))(Button(w.back)(()))).flatMap(_ => main[R](w, Some(a)))
       case Right(a) => result[R](w, a)

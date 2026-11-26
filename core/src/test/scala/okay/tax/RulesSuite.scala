@@ -18,6 +18,8 @@ class RulesSuite extends munit.FunSuite:
     def first(q: String) = Rules.find(q).headOption.map(_.id)
     assertEquals(first("czy mogę rozliczyć się z żoną jeśli mam ryczałt?"), Some("halves.excluded"))
     assertEquals(first("How much is the tax-free amount?"), Some("free"))
+    assertEquals(first("можно ли на ryczałt рассчитаться вместе с женой?"), Some("halves.excluded"))
+    assertEquals(first("Can I file together with my husband if I am on the linear tax?"), Some("halves.excluded"))
     assertEquals(first("до какого числа подавать декларацию?"), Some("deadline"))
     assertEquals(first("скільки пільга на дитину"), Some("children"))
     assertEquals(Rules.find("xyzzy"), Vector.empty)

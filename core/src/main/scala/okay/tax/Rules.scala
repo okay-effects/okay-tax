@@ -87,12 +87,12 @@ object Rules:
         "разом: податок дорівнює подвоєному податку з половини їхнього спільного доходу. Кожен спершу віднімає своє.")(
       pit("6 ust. 2", "na wspólny wniosek wyrażony w zeznaniu podatkowym, opodatkowani łącznie od sumy"),
       pit("6 ust. 2", "w podwójnej wysokości podatku obliczonego od połowy łącznych dochodów małżonków")),
-    r("halves.excluded", "Wspólne rozliczenie a liniowy lub ryczałt; czy na ryczałcie mogę rozliczyć się z żoną; " +
+    r("halves.excluded", "Wspólne rozliczenie a liniowy lub ryczałt; czy na ryczałcie mogę rozliczyć się razem z żoną; " +
       "liniowy wyklucza rozliczenie z małżonkiem",
-      "Joint filing and the linear tax or ryczałt; can I file jointly on ryczałt; linear excludes filing with a spouse",
-      "Совместная декларация и линейный налог или ryczałt; можно ли на ryczałt рассчитаться с женой; " +
+      "Joint filing and the linear tax or ryczałt; can I file together with my wife on ryczałt; linear excludes filing with a spouse",
+      "Совместная декларация и линейный налог или ryczałt; можно ли на ryczałt рассчитаться вместе с женой; " +
         "линейный исключает совместную декларацию",
-      "Спільна декларація і лінійний податок або ryczałt; чи можна на ryczałt розрахуватися з дружиною; " +
+      "Спільна декларація і лінійний податок або ryczałt; чи можна на ryczałt розрахуватися разом з дружиною; " +
         "лінійний виключає спільну декларацію")(
       "Wspólnego rozliczenia z małżonkiem ani jako samotny rodzic nie ma, jeśli choćby jeden z małżonków (albo " +
         "rodzic lub dziecko) stosuje podatek liniowy (art. 30c) albo ryczałt. Wtedy każdy rozlicza się osobno.",

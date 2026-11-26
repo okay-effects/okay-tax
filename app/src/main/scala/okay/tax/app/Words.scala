@@ -20,7 +20,7 @@ object Words:
     "każdy ZUS — rok i średni miesiąc.", "UoP: brutto miesięcznie", "B2B: przychód miesięcznie",
     "B2B: stawka dzienna", "B2B: dni w miesiącu", "Stawka ryczałtu", "Koszty firmy miesięcznie",
     "Dobrowolne chorobowe", "Policz", "To kalkulator, nie doradztwo podatkowe: liczby wynikają wprost z przepisów " +
-      "(źródła poniżej), decyzja należy do Ciebie.", "Wpisz brutto UoP albo przychód B2B.", "Wróć", "brutto",
+      "(cytowanych na stronie), decyzja należy do Ciebie.", "Wpisz brutto UoP albo przychód B2B.", "Wróć", "brutto",
     "skala", "liniowy", "ryczałt", "pełny ZUS", "preferencyjny ZUS", "ulga na start", "Wariant",
     "Na rękę / miesiąc", "Na rękę / rok", "Brutto / przychód", "Składki społeczne", "Składka zdrowotna",
     "Podatek (średnio)", "Inne (FP, koszty)", "Na rękę", "Skąd te liczby",
@@ -30,7 +30,7 @@ object Words:
     "contract and / or a B2B revenue (a month, or a day rate and days). Every option is computed: the scale, the " +
     "linear tax, ryczałt, each ZUS — the year and the average month.", "UoP: gross a month", "B2B: revenue a month",
     "B2B: day rate", "B2B: days a month", "Ryczałt rate", "Business costs a month", "Voluntary sickness insurance",
-    "Compute", "A calculator, not tax advice: the numbers follow from the statutes (sources below); the decision " +
+    "Compute", "A calculator, not tax advice: the numbers follow from the statutes (quoted on the page); the decision " +
       "is yours.", "Enter a UoP gross or a B2B revenue.", "Back", "gross", "scale", "linear", "ryczałt",
     "full ZUS", "preferential ZUS", "ulga na start", "Option", "Take-home / month", "Take-home / year",
     "Gross / revenue", "Social contributions", "Health contribution", "Tax (average)", "Other (FP, costs)",
@@ -40,7 +40,7 @@ object Words:
     "и/или выручку B2B (в месяц или дневную ставку и число дней). Посчитаем все варианты: шкалу, линейный налог, " +
     "ryczałt, каждый ZUS — за год и в среднем за месяц.", "UoP: брутто в месяц", "B2B: выручка в месяц",
     "B2B: ставка в день", "B2B: дней в месяце", "Ставка ryczałt", "Расходы фирмы в месяц", "Добровольный больничный",
-    "Посчитать", "Это калькулятор, а не налоговая консультация: числа следуют прямо из законов (источники ниже), " +
+    "Посчитать", "Это калькулятор, а не налоговая консультация: числа следуют прямо из законов (цитаты на странице), " +
       "решение за вами.", "Введите брутто UoP или выручку B2B.", "Назад", "брутто", "шкала", "линейный",
     "ryczałt", "полный ZUS", "льготный ZUS", "ulga na start", "Вариант", "На руки / месяц", "На руки / год",
     "Брутто / выручка", "Социальные взносы", "Взнос на здоровье", "Налог (в среднем)", "Прочее (FP, расходы)",
@@ -51,7 +51,7 @@ object Words:
     "податок, ryczałt, кожен ZUS — за рік і в середньому за місяць.", "UoP: брутто на місяць",
     "B2B: дохід на місяць", "B2B: ставка на день", "B2B: днів на місяць", "Ставка ryczałt", "Витрати фірми на місяць",
     "Добровільний лікарняний", "Порахувати", "Це калькулятор, а не податкова консультація: числа випливають прямо " +
-      "із законів (джерела нижче), рішення за вами.", "Введіть брутто UoP або дохід B2B.", "Назад", "брутто",
+      "із законів (цитати на сторінці), рішення за вами.", "Введіть брутто UoP або дохід B2B.", "Назад", "брутто",
     "шкала", "лінійний", "ryczałt", "повний ZUS", "пільговий ZUS", "ulga na start", "Варіант", "На руки / місяць",
     "На руки / рік", "Брутто / дохід", "Соціальні внески", "Внесок на здоров'я", "Податок (у середньому)",
     "Інше (FP, витрати)", "На руки", "Звідки ці числа", "Кожне значення з цитатою із закону, звідки воно взяте:",
