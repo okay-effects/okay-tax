@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ile na rękę? UoP i B2B 2026 — okay-tax</title>
+  <meta name="description" content="Take-home pay in Poland, UoP and B2B, 2026: every option side by side, every number from the statute. A calculator, not tax advice.">
+  <style>
+    body { margin: 0; }
+    header.top { display: flex; align-items: baseline; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #e3e7ee; }
+    header.top .name { font-weight: 600; }
+    header.top .langs { margin-left: auto; }
+    header.top { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    header.top .langs a { margin-left: 10px; color: #fff; text-decoration: none; opacity: .75; }
+    header.top .langs a:hover, header.top .langs a.on { opacity: 1; text-decoration: underline; }
+    /* the foot: who built it on the left, "Need more?" (the author) on the right */
+    body > footer { border-top: 1px solid #e3e7ee; padding: 10px 16px; font-size: 14px; }
+    body > footer .bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+    body > footer .more { margin-left: auto; }
+  </style>
+  <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js'
+    data-cf-beacon='{"token": "bf3bb7f255b64c1da1185fd68bdf6a44", "spa": true}'></script>
+</head>
+<body>
+  <header class="top">
+    <span class="name">okay-tax</span>
+    <span class="langs"><a href="?lang=en">EN</a><a href="?lang=pl">PL</a><a href="?lang=ru">RU</a><a
+      href="?lang=uk">UK</a></span>
+  </header>
+  <script>{ const known = ["en", "pl", "ru", "uk"]
+    const asked = new URLSearchParams(location.search).get("lang") || navigator.language.slice(0, 2)
+    const lang = known.includes(asked) ? asked : "pl"
+    document.documentElement.lang = lang
+    for (const a of document.querySelectorAll(".langs a"))
+      if (a.textContent.toLowerCase() === lang) a.classList.add("on") }</script>
+  <main id="app"></main>
+  <footer><div class="bar">
+    <span><span class="built">Built on</span> <a href="https://github.com/okay-effects" target="_blank"
+      rel="noopener noreferrer">okay-effects</a> — <span class="what">algebraic effects for Scala</span></span>
+    <a class="more" href="https://okay-effects.github.io/#author" target="_blank" rel="noopener noreferrer">Need
+      more?</a>
+  </div></footer>
+  <script>{ const words = {
+      pl: ["Zbudowane na", "efekty algebraiczne dla Scali", "Potrzebujesz więcej?", "Prywatność i warunki"],
+      ru: ["Сделано на", "алгебраические эффекты для Scala", "Нужно больше?", "Конфиденциальность и условия"],
+      uk: ["Зроблено на", "алгебраїчні ефекти для Scala", "Потрібно більше?", "Конфіденційність і умови"]
+    }[document.documentElement.lang]
+    if (words) {
+      document.querySelector("footer .built").textContent = words[0]
+      document.querySelector("footer .what").textContent = words[1]
+      document.querySelector("footer .more").textContent = words[2]
+    } }</script>
+  <script src="main-cdb436fc9c19.js"></script>
+</body>
+</html>
